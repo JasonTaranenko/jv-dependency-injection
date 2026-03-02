@@ -24,9 +24,9 @@ public class Injector {
     }
 
     public Object getInstance(Class<?> interfaceClazz) {
-        Object clazzImplementationInstance = null;
         Object fieldInstance;
         Class<?> clazz = findImplementation(interfaceClazz);
+        Object clazzImplementationInstance = getNewInstance(clazz);
         if (!clazz.isAnnotationPresent(Component.class)) {
             throw new RuntimeException("Injection failed,"
                     + " missing @Component"
@@ -37,8 +37,6 @@ public class Injector {
         for (Field field : declaredFields) {
             if (field.isAnnotationPresent(Inject.class)) {
                 fieldInstance = getInstance(field.getType());
-                clazzImplementationInstance = getNewInstance(clazz);
-
                 field.setAccessible(true);
                 try {
                     field.set(clazzImplementationInstance, fieldInstance);
@@ -46,13 +44,8 @@ public class Injector {
                     throw new RuntimeException("Can't initialize field value. Class: "
                             + clazz.getName() + " Field: " + field.getName(), e);
                 }
-
             }
         }
-        if (clazzImplementationInstance == null) {
-            clazzImplementationInstance = getNewInstance(clazz);
-        }
-
         return clazzImplementationInstance;
     }
 
